@@ -25,34 +25,44 @@
 // Or if property = 'age' -> [40, 26, 22, 28, 23, 45, 21, ...]
 
 const getAllValuesForProperty = (data, property) => {
-	return []
+	const allValues = data.map((p) => p.fields[property])
+	return allValues
 }
 
 // 2 -------------------------------------------------------------
 // Return an array where a given property matches the given value
 // For example property = 'sex' and value = 'male' returns an 
 // array of all the male passengers [{...}, {...}, {...}, ...]
+// Here the goal is to return an array of passenger objects 
+// that patch the property and value. 
 
 const filterByProperty = (data, property, value) => {
-	return []
+	return data.filer(p => p.fields[property] === value)
 }
 
 // 3 -------------------------------------------------------------
-// Filter out missing or null values
+// Filter out missing values
 // Return an array where the objects that have undefined for a 
 // given property have been removed
 
 const filterNullForProperty = (data, property) => {
-	return []
+	return data.filer(p => p.fields[property] !== undefined)
 }
 
 // 4 -------------------------------------------------------------
 // Abstract the sum by creating a function that returns the sum 
 // for any (numeric) property
-// Return the total of all values for a given property. This
+// Return the total of all values for a given property.
+// You need to remove any missing values because n + undefined = NaN!
 
 const sumAllProperty = (data, property) => {
-	return 0
+	return data.reduce((n, p) => {
+		const value = p.fields[property]
+		if (typeof value === 'number') {
+			return n + value
+		}
+			return n
+	}, 0)
 }
 
 
@@ -65,10 +75,33 @@ const sumAllProperty = (data, property) => {
 // So the output should be: { S: 644, C: 168, Q: 77, undefined: 2 }
 // That is 644 passengers embarked at South Hampton. 168 embarked 
 // at Cherbourg, 77 emabrked at Queenstown, and 2 are undedfined
+// reduce(() => {}, [])
+// if property does not exist 
+//    add that property with value 1
+// else
+//    add 1 to property value
 
 const countAllProperty = (data, property) => {
-	return {}
+	const uniqueValues = {}
+	data.foreach((p) => {
+		if (p !== undefined) {
+			if (uniqueValues[p]) {
+				p[value]++
+			} else {
+				uniqueValues[p] = 1
+			}
+			} else {
+				if (p.undefined) {
+					p.undefined++
+				} else {
+					p.undefined = 1
+				}
+			}
+	})
+	return uniqueValues
 }
+
+// Use reduce with an object as the starting accumulator! 
 
 
 // 6 ------------------------------------------------------------
@@ -80,8 +113,32 @@ const countAllProperty = (data, property) => {
 // ages 0 - 10, 10 - 20, 20 - 30 etc. 
 
 const makeHistogram = (data, property, step) => {
-	return []
+	const histogram = data.reduce((result, p) => {
+	  const values = p.fields[property];
+	  if (typeof values === "number") {
+		const bucket = Math.floor(values / step);
+		if (result[bucket]) {
+		  result[bucket]++
+		} else {
+		  result[bucket] = 1
+		}
+	  }
+	  return result;
+	}, [])
+  
+	return Array.from(histogram, (n) => n || 0)
 }
+
+// Note! There may not be no values for a particular step. For example
+// if we get passenger ages in increments of 5 there are 0 passengers in the 
+// 70 bracket but there are passengers in 60, and 80. So you might end up with 
+// Age bucket
+//   5 10 15 20  25  30 35 40 45 50 55 60 65 70 75            80  85
+// [40,22,16,86,114,106,95,72,48,41,32,16,15, 4, 6,<1 empty item>, 1]
+// There are 0 passengers in the 76 to 80 year age bucket. You may have the 
+// right answer but if that slot in the array is empty the test will fail 
+// becuase that index should show 0. There are 0 passengers in that age range. 
+
 
 // 7 ------------------------------------------------------------
 // normalizeProperty takes data and a property and returns an 
@@ -89,8 +146,20 @@ const makeHistogram = (data, property, step) => {
 // to divide each value by the maximum value in the array.
 
 const normalizeProperty = (data, property) => {
-	return []
-}
+	const values = data.map((p) => p.fields[property]).filter((value) => !isNaN(value));  
+	const maxValues = Math.max(...values);  
+	const normalizedValues = values.map((value) => value / maxValues);
+	return normalizedValues;
+};
+
+// Normalizing is an important process that can make many other
+// operations easier. Normalizing allows you to take numbers in one 
+// range and convert them to any other range. 
+// For this example you need to find the max value first before 
+// generating an array of normalized values.
+
+// If the range of data included negative numbers or did not start at 0
+// we might also need to find the minimum value. 
 
 // 8 ------------------------------------------------------------
 // Write a function that gets all unique values for a property. 
@@ -100,8 +169,15 @@ const normalizeProperty = (data, property) => {
 // would return ['male', 'female']
 
 const getUniqueValues = (data, property) => {
-	return []
+	const values = data.map((p) => p.fields[property]).filter((value) => value !== undefined);
+	const uniqueValuesSet = new Set(values)
+	const uniqueValuesArray = Array.from(uniqueValuesSet)
+	return uniqueValuesArray
 }
+  
+// There are a couple ways to do this. 
+// Use an object and add each value as a key. The value can be anything. 
+// Use a Set. Be sure to convert this to an array before returning! 
 
 // --------------------------------------------------------------
 // --------------------------------------------------------------
