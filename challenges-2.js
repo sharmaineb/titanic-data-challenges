@@ -37,7 +37,7 @@ const getAllValuesForProperty = (data, property) => {
 // that patch the property and value. 
 
 const filterByProperty = (data, property, value) => {
-	return data.filer(p => p.fields[property] === value)
+	return data.filter(p => p.fields[property] === value)
 }
 
 // 3 -------------------------------------------------------------
@@ -46,7 +46,7 @@ const filterByProperty = (data, property, value) => {
 // given property have been removed
 
 const filterNullForProperty = (data, property) => {
-	return data.filer(p => p.fields[property] !== undefined)
+	return data.filter(p => p.fields[property] !== undefined)
 }
 
 // 4 -------------------------------------------------------------
@@ -82,23 +82,24 @@ const sumAllProperty = (data, property) => {
 //    add 1 to property value
 
 const countAllProperty = (data, property) => {
-	const uniqueValues = {}
-	data.foreach((p) => {
-		if (p !== undefined) {
-			if (uniqueValues[p]) {
-				p[value]++
-			} else {
-				uniqueValues[p] = 1
-			}
-			} else {
-				if (p.undefined) {
-					p.undefined++
-				} else {
-					p.undefined = 1
-				}
-			}
-	})
-	return uniqueValues
+    const uniqueValues = {};
+    data.forEach((p) => {
+        const value = p.fields[property];
+        if (value !== undefined) {
+            if (uniqueValues[value]) {
+                uniqueValues[value]++;
+            } else {
+                uniqueValues[value] = 1;
+            }
+        } else {
+            if (uniqueValues.undefined) {
+                uniqueValues.undefined++;
+            } else {
+                uniqueValues.undefined = 1;
+            }
+        }
+    });
+    return uniqueValues;
 }
 
 // Use reduce with an object as the starting accumulator! 
